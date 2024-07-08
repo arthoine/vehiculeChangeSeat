@@ -8,8 +8,6 @@ Citizen.CreateThread(function()
     end
 end)
 
-
--- Fonction pour changer de place dans le véhicule
 function ChangeSeat(seatIndex)
     local playerPed = PlayerPedId()
     local vehicle = GetVehiclePedIsIn(playerPed, false)
@@ -18,50 +16,60 @@ function ChangeSeat(seatIndex)
     end
 end
 
--- Ajouter une cible au véhicule lorsque le joueur est dans un véhicule
+function OpenSeatMenu()
+    local playerPed = PlayerPedId()
+    local vehicle = GetVehiclePedIsIn(playerPed, false)
+    local maxSeats = GetVehicleModelNumberOfSeats(GetEntityModel(vehicle)) - 2
+
+    local elements = {
+        {
+            title = 'Place conducteur',
+            event = 'changeSeat',
+            args = -1
+        },
+        {
+            title = 'Place passager',
+            event = 'changeSeat',
+            args = 0
+        }
+    }
+
+    for i = 1, maxSeats do
+        table.insert(elements, {
+            title = 'Place arrière ' .. i,
+            event = 'changeSeat',
+            args = i
+        })
+    end
+
+    lib.registerContext({
+        id = 'seat_menu',
+        title = 'Menu des places',
+        options = elements
+    })
+
+    lib.showContext('seat_menu')
+end
+
 Citizen.CreateThread(function()
     local targetAdded = false
     while true do
-        Citizen.Wait(500) -- Vérifier toutes les 500ms pour économiser les ressources
+        Citizen.Wait(500)
         local playerPed = PlayerPedId()
         if IsPedInAnyVehicle(playerPed, false) then
             local vehicle = GetVehiclePedIsIn(playerPed, false)
 
             if not targetAdded then
-                local maxSeats = GetVehicleModelNumberOfSeats(GetEntityModel(vehicle)) - 2
-                local options = {
+                exports.ox_target:addLocalEntity(vehicle, {
                     {
-                        name = 'change_seat_driver',
+                        name = 'open_seat_menu',
                         icon = 'fa-solid fa-exchange-alt',
-                        label = 'Passer à la place conducteur',
+                        label = 'Ouvrir le menu des places',
                         onSelect = function()
-                            -- Changer à la place conducteur (index -1)
-                            ChangeSeat(-1)
-                        end
-                    },
-                    {
-                        name = 'change_seat_passenger',
-                        icon = 'fa-solid fa-exchange-alt',
-                        label = 'Passer à la place passager',
-                        onSelect = function()
-                            -- Changer à la place passager (index 0)
-                            ChangeSeat(0)
+                            OpenSeatMenu()
                         end
                     }
-                }
-
-                for i = 1, maxSeats do
-                    table.insert(options, {
-                        name = 'change_seat_back_' .. i,
-                        icon = 'fa-solid fa-exchange-alt',
-                        label = 'Passer à la place arrière ' .. i,
-                        onSelect = function()
-                            ChangeSeat(i)
-                        end
-                    })
-                end
-
-                exports.ox_target:addLocalEntity(vehicle, options)
+                })
                 targetAdded = true
             end
         else
@@ -74,4 +82,9 @@ Citizen.CreateThread(function()
             end
         end
     end
+end)
+
+RegisterNetEvent('changeSeat')
+AddEventHandler('changeSeat', function(seatIndex)
+    ChangeSeat(seatIndex)
 end)
