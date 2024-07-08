@@ -30,6 +30,7 @@ function OpenSeatMenu()
     if not IsSeatOccupied(vehicle, -1) then
         table.insert(elements, {
             title = 'Place conducteur',
+            icon = 'fa-solid fa-user',
             event = 'changeSeat',
             args = -1
         })
@@ -38,6 +39,7 @@ function OpenSeatMenu()
     if not IsSeatOccupied(vehicle, 0) then
         table.insert(elements, {
             title = 'Place passager',
+            icon = 'fa-solid fa-user',
             event = 'changeSeat',
             args = 0
         })
@@ -47,6 +49,7 @@ function OpenSeatMenu()
         if not IsSeatOccupied(vehicle, i) then
             table.insert(elements, {
                 title = 'Place arrière ' .. i,
+                icon = 'fa-solid fa-user-friends',
                 event = 'changeSeat',
                 args = i
             })
