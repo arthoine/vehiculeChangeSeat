@@ -16,30 +16,41 @@ function ChangeSeat(seatIndex)
     end
 end
 
+function IsSeatOccupied(vehicle, seatIndex)
+    return not IsVehicleSeatFree(vehicle, seatIndex)
+end
+
 function OpenSeatMenu()
     local playerPed = PlayerPedId()
     local vehicle = GetVehiclePedIsIn(playerPed, false)
     local maxSeats = GetVehicleModelNumberOfSeats(GetEntityModel(vehicle)) - 2
 
-    local elements = {
-        {
+    local elements = {}
+
+    if not IsSeatOccupied(vehicle, -1) then
+        table.insert(elements, {
             title = 'Place conducteur',
             event = 'changeSeat',
             args = -1
-        },
-        {
+        })
+    end
+
+    if not IsSeatOccupied(vehicle, 0) then
+        table.insert(elements, {
             title = 'Place passager',
             event = 'changeSeat',
             args = 0
-        }
-    }
+        })
+    end
 
     for i = 1, maxSeats do
-        table.insert(elements, {
-            title = 'Place arrière ' .. i,
-            event = 'changeSeat',
-            args = i
-        })
+        if not IsSeatOccupied(vehicle, i) then
+            table.insert(elements, {
+                title = 'Place arrière ' .. i,
+                event = 'changeSeat',
+                args = i
+            })
+        end
     end
 
     lib.registerContext({
